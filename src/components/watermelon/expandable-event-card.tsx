@@ -4,7 +4,9 @@
 // arbitrary cover node, the card shows chips, and the modal closes on Escape and locks page scroll.
 
 import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { setScrollLocked } from '@/components/site/smooth-scroll';
 
 interface ExpandableCardProps {
   id: string;
@@ -14,20 +16,29 @@ interface ExpandableCardProps {
   eyebrow?: string;
   footer?: ReactNode;
   content: ReactNode;
+  /** Shown at the top of the opened card instead of the cover (e.g. a demo video). */
+  media?: ReactNode;
+  coverClassName?: string;
 }
 
-export default function ExpandableEventCard({ id, cover, title, description, eyebrow, footer, content }: ExpandableCardProps) {
+export default function ExpandableEventCard({ id, cover, title, description, eyebrow, footer, content, media, coverClassName = 'h-44' }: ExpandableCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const layoutId = `expandable-card-${id}`;
+
+  // lets other UI (e.g. the command palette) open this card: window.dispatchEvent(new CustomEvent('open-card', { detail: id }))
+  useEffect(() => {
+    const onOpen = (e: Event) => (e as CustomEvent<string>).detail === id && setIsOpen(true);
+    window.addEventListener('open-card', onOpen);
+    return () => window.removeEventListener('open-card', onOpen);
+  }, [id]);
 
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setIsOpen(false);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    setScrollLocked(true);
     window.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = prev;
+      setScrollLocked(false);
       window.removeEventListener('keydown', onKey);
     };
   }, [isOpen]);
@@ -48,7 +59,7 @@ export default function ExpandableEventCard({ id, cover, title, description, eye
         }}
         className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-colors hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
-        <motion.div layoutId={`cover-${layoutId}`} className="relative h-44 w-full overflow-hidden">
+        <motion.div layoutId={`cover-${layoutId}`} className={`relative w-full overflow-hidden ${coverClassName}`}>
           <div className="h-full w-full transition-transform duration-500 group-hover:scale-[1.04]">{cover}</div>
         </motion.div>
         <div className="flex flex-1 flex-col p-5">
@@ -63,6 +74,8 @@ export default function ExpandableEventCard({ id, cover, title, description, eye
         </div>
       </motion.div>
 
+      {/* portal: a transformed ancestor (e.g. a tilt wrapper) would otherwise trap position:fixed */}
+      {typeof document !== 'undefined' && createPortal(
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-8" role="dialog" aria-modal="true" aria-label={title}>
@@ -75,7 +88,8 @@ export default function ExpandableEventCard({ id, cover, title, description, eye
             />
             <motion.div
               layoutId={layoutId}
-              className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+              className="relative z-10 flex max-h-[92vh] w-full max-w-3xl flex-col overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl"
+              data-lenis-prevent
             >
               <button
                 onClick={() => setIsOpen(false)}
@@ -85,11 +99,17 @@ export default function ExpandableEventCard({ id, cover, title, description, eye
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
               </button>
 
-              <motion.div layoutId={`cover-${layoutId}`} className="relative h-48 w-full shrink-0 overflow-hidden sm:h-56">
-                {cover}
-              </motion.div>
+              {media ? (
+                <motion.div layoutId={`cover-${layoutId}`} className="relative w-full shrink-0 bg-card px-6 pt-14 sm:px-8">
+                  {media}
+                </motion.div>
+              ) : (
+                <motion.div layoutId={`cover-${layoutId}`} className="relative h-48 w-full shrink-0 overflow-hidden sm:h-56">
+                  {cover}
+                </motion.div>
+              )}
 
-              <div className="overflow-y-auto p-6 sm:p-8">
+              <div className="overflow-y-auto p-6 sm:p-8" data-lenis-prevent>
                 <motion.h3 layoutId={`title-${layoutId}`} className="mb-2 text-2xl font-semibold tracking-tight text-foreground">
                   {title}
                 </motion.h3>
@@ -109,7 +129,8 @@ export default function ExpandableEventCard({ id, cover, title, description, eye
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body)}
     </>
   );
 }

@@ -62,6 +62,13 @@ export const experience: Experience[] = [
 
 export type Category = "ai" | "backend" | "health" | "mobile";
 
+export type Media = {
+  video?:
+    | { kind: "mp4"; src: string; poster: string; portrait?: boolean }
+    | { kind: "youtube"; id: string; poster?: string };
+  images?: { src: string; caption: string }[];
+};
+
 export type Project = {
   slug: string;
   name: string;
@@ -77,6 +84,7 @@ export type Project = {
   featured?: boolean;
   context?: string;       // e.g. hackathon
   hidden?: boolean;       // keep the entry but leave it off the site
+  media?: Media;          // demo video and/or real screenshots, shown when the card opens
 };
 
 export const projects: Project[] = [
@@ -96,6 +104,15 @@ export const projects: Project[] = [
     ],
     repo: "https://github.com/VP-TT/ledgerline",
     featured: true,
+    media: {
+      video: { kind: "mp4", src: "/media/ledgerline.mp4", poster: "/media/ledgerline-poster.jpg" },
+      images: [
+        { src: "/media/ledgerline-1.jpg", caption: "A live run: the gateway records the charge but answers after the 5 s read timeout, so the payment goes UNKNOWN (not FAILED) and a status check finds the charge a second later." },
+        { src: "/media/ledgerline-2.jpg", caption: "Idempotency: retrying with the same key replays the original 202 exactly; reusing the key with a different amount is rejected with 422." },
+        { src: "/media/ledgerline-3.jpg", caption: "The API in Swagger UI: wallets, payments, refunds, rewards, signed gateway webhooks, reconciliation and outbox admin." },
+        { src: "/media/ledgerline-4.jpg", caption: "Load test (16 Oct 2026, one laptop): removing the hot-row lock took p95 from 1,392 ms to 35–57 ms at 200 payments/s." },
+      ],
+    },
   },
   {
     slug: "prism",
@@ -113,6 +130,14 @@ export const projects: Project[] = [
     ],
     repo: "https://github.com/VP-TT/prism",
     featured: true,
+    media: {
+      images: [
+        { src: "/media/prism-1.jpg", caption: "The eval harness running for real on a local qwen2.5-coder 7B: 1 of 2 planted bugs caught, 0 false positives, 1 failed run (a single run, not a benchmark)." },
+        { src: "/media/prism-2.jpg", caption: "PRism's actual review of a planted hard-coded-secret bug, the model's exact output rendered in GitHub's review layout (not posted to GitHub)." },
+        { src: "/media/prism-3.jpg", caption: "The React dashboard's Metrics page: acceptance rate, cost and p50/p95 latency (local dev, no reviews yet)." },
+        { src: "/media/prism-4.jpg", caption: "The Reviews list with repo and status filters (empty state in local dev)." },
+      ],
+    },
   },
   {
     slug: "vidsense",
@@ -130,6 +155,15 @@ export const projects: Project[] = [
     ],
     repo: "https://github.com/VP-TT/vidsense",
     featured: true,
+    media: {
+      video: { kind: "mp4", src: "/media/vidsense.mp4", poster: "/media/vidsense-poster.jpg" },
+      images: [
+        { src: "/media/vidsense-1.jpg", caption: "A cited answer about the desert scene; clicking [00:32] jumped the player there (deepseek-r1:8b + qwen2.5-vl, local)." },
+        { src: "/media/vidsense-2.jpg", caption: "How the video was processed: 7 keyframes, 100% coverage, and the DTW alignment of speech to scenes." },
+        { src: "/media/vidsense-3.jpg", caption: "Moments search with no LLM: semantic retrieval over scene-aligned chunks." },
+        { src: "/media/vidsense-4.jpg", caption: "Timestamped transcript with caption (.vtt) download." },
+      ],
+    },
   },
   {
     slug: "cura",
@@ -145,7 +179,15 @@ export const projects: Project[] = [
       "A FastAPI inference server hosts Apollo-2B with the project's LoRA adapter; a Node/Express API with MongoDB handles accounts and saved chat sessions; the React + TypeScript front end has light and dark themes and a responsive chat UI.",
     ],
     repo: "https://github.com/VP-TT/Cura",
-    featured: true,
+    featured: false,
+    media: {
+      images: [
+        { src: "/media/cura-1.jpg", caption: "Cura's landing page and feature overview (React + TypeScript front end, dark theme)." },
+        { src: "/media/cura-2.jpg", caption: "Use cases: symptom checks, medical translation, patient education, triage." },
+        { src: "/media/cura-3.jpg", caption: "Features page: multilingual chat with memory across sessions." },
+        { src: "/media/cura-4.jpg", caption: "The chat interface (front end only; the Apollo-2B server was too slow on a laptop CPU to show a live answer)." },
+      ],
+    },
   },
   {
     slug: "rosella",
@@ -161,6 +203,9 @@ export const projects: Project[] = [
       "Built with Flutter for Android and iOS on Firebase Authentication, Cloud Firestore and Firebase Storage.",
     ],
     repo: "https://github.com/VP-TT/Rosella",
+    media: {
+      video: { kind: "mp4", src: "/media/rosella.mp4", poster: "/media/rosella-poster.jpg", portrait: true },
+    },
   },
   {
     slug: "noc-copilot",
@@ -178,6 +223,14 @@ export const projects: Project[] = [
     repo: "https://github.com/VP-TT/NOC-Copilot",
     demo: "https://youtu.be/O8VrDtAuETs",
     context: "ISRO Bharatiya Antariksh Hackathon",
+    media: {
+      video: { kind: "youtube", id: "O8VrDtAuETs", poster: "/media/noc-1.jpg" },
+      images: [
+        { src: "/media/noc-1.jpg", caption: "Operator console: risk climbing on the congested hub-spoke path, flag raised 21 steps before the SLA breach." },
+        { src: "/media/noc-2.jpg", caption: "Predictions across the network, a grounded remediation card citing the runbook, and the plain-English copilot chat." },
+        { src: "/media/noc-3.jpg", caption: "Reactive vs predictive on the same fault: the copilot flags at t=86, the SLA monitor only alarms at the breach (t=107)." },
+      ],
+    },
   },
   {
     slug: "medtriage",
@@ -193,6 +246,14 @@ export const projects: Project[] = [
       "Episodes are multi-step with time and resource pressure; graders give partial credit with safety penalties, so the benchmark rewards careful clinical reasoning rather than lucky single answers.",
     ],
     repo: "https://github.com/VP-TT/MedTriage",
+    media: {
+      images: [
+        { src: "/media/medtriage-1.jpg", caption: "A real vital-triage episode (rule-based baseline policy, rendered from the server's JSON): ECG reveals a STEMI, ESI 1 committed, scored 1.00." },
+        { src: "/media/medtriage-2.jpg", caption: "Differential diagnosis after a long-haul flight: CT pulmonary angiography ordered, PE ranked first, scored 0.96." },
+        { src: "/media/medtriage-3.jpg", caption: "Treatment safety: the baseline's insulin plan in DKA with low potassium trips the contraindication check and scores 0.00 — the safety penalty working." },
+        { src: "/media/medtriage-4.jpg", caption: "The environment's API: /reset, /step, /state and typed action schemas." },
+      ],
+    },
   },
   {
     slug: "talqs",
@@ -207,6 +268,14 @@ export const projects: Project[] = [
       "Two Transformer models implemented from the ground up: one answers questions about court judgments with abstractive answers, the other produces concise summaries of lengthy judgments.",
     ],
     repo: "https://github.com/VP-TT/t_alqs",
+    media: {
+      images: [
+        { src: "/media/talqs-1.jpg", caption: "TALQS landing page." },
+        { src: "/media/talqs-2.jpg", caption: "Services: legal document summarisation and legal Q&A." },
+        { src: "/media/talqs-3.jpg", caption: "The summarisation page (upload or paste a judgment)." },
+        { src: "/media/talqs-4.jpg", caption: "Code, not UI: the from-scratch multi-head attention in backend/transformer_model.py (lines 101–136)." },
+      ],
+    },
   },
   {
     slug: "clinique",
@@ -223,6 +292,15 @@ export const projects: Project[] = [
     ],
     repo: "https://github.com/VP-TT/Nest2.0_PS1",
     context: "Novartis NEST 2.0",
+    media: {
+      video: { kind: "mp4", src: "/media/clinique.mp4", poster: "/media/clinique-poster.jpg" },
+      images: [
+        { src: "/media/clinique-1.jpg", caption: "Executive dashboard: data-quality index, high-risk patients and anomalies across 16 trials." },
+        { src: "/media/clinique-2.jpg", caption: "Multi-study intelligence: best vs weakest study and the performance gap between them." },
+        { src: "/media/clinique-3.jpg", caption: "Anomaly detection by study, with the most severe records." },
+        { src: "/media/clinique-4.jpg", caption: "Early-warning predictor: patient-level risk from the bundled model." },
+      ],
+    },
   },
   {
     slug: "autoverifymd",
